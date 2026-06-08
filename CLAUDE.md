@@ -44,7 +44,7 @@ ADC-capable pins (analog input): GPIO0–GPIO4 (left side, lower half)
 | Moisture sensor GND | GND | Left-2 | — |
 | Pump control | GPIO5 | Right-1 | Output → KT829A base via 1kΩ resistor |
 | Water level (reed switch) | GPIO3 | Left-5 | Input, pull-up. LOW = water present, HIGH = tank empty |
-| Tank-empty warning LED | GPIO6 | Right-2 | External LED, active HIGH. 220Ω resistor in series to GND |
+| Tank-empty warning LED | GPIO0 | Left-8 | External LED, active HIGH. 220Ω resistor in series to GND |
 
 Calibrated ADC bounds (this board + sensor): dry=3950, wet=1360
 
@@ -106,7 +106,7 @@ CLAUDE.md           — this file
 - [x] Milestone 4 — Combine: automatic watering loop with threshold
 - [x] Milestone 5 — NVS config storage + ADC averaging
 - [x] Milestone 5b — Water level sensor (reed switch on GPIO3, blink LED + skip pump when empty)
-- [ ] Milestone 6 — Deep sleep / sleepy end device
+- [ ] Milestone 6 — Deep sleep  ← current
 - [ ] Milestone 7 — Bluetooth + Android app
 
 ## Key concepts (for learning)

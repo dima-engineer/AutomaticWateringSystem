@@ -12,7 +12,7 @@ static const watering_config_t DEFAULTS = {
     .threshold_pct    = 40,
     .raw_dry          = 3000,
     .raw_wet          = 1000,
-    .pump_duration_ms = 5000,
+    .pump_duration_ms = 15000,
     .pump_cooldown_ms = 10000,
     .check_interval_ms = 10000,
 };
