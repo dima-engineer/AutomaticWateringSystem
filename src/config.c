@@ -10,9 +10,9 @@ static const char *TAG = "config";
 /* Defaults used on first boot or if NVS is erased */
 static const watering_config_t DEFAULTS = {
     .threshold_pct    = 40,
-    .raw_dry          = 3950,
-    .raw_wet          = 1360,
-    .pump_duration_ms = 4000,
+    .raw_dry          = 3000,
+    .raw_wet          = 1000,
+    .pump_duration_ms = 5000,
     .pump_cooldown_ms = 10000,
     .check_interval_ms = 10000,
 };

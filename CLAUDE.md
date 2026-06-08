@@ -40,7 +40,7 @@ ADC-capable pins (analog input): GPIO0–GPIO4 (left side, lower half)
 |--------|------|------|-------|
 | Onboard LED | GPIO8 | Right-4 | Active LOW — confirmed working |
 | Moisture sensor AOUT | GPIO1 | Left-7 | ADC1 channel 1 — confirmed working |
-| Moisture sensor VCC | 5V | Left-1 | Sensor works on 5V; AOUT stays within ADC range |
+| Moisture sensor VCC | GPIO4 | Left-4 | Driven HIGH only during measurement (saves power). 3.3V — recalibrate raw_dry/raw_wet after rewiring |
 | Moisture sensor GND | GND | Left-2 | — |
 | Pump control | GPIO5 | Right-1 | Output → KT829A base via 1kΩ resistor |
 | Water level (reed switch) | GPIO3 | Left-5 | Input, pull-up. LOW = water present, HIGH = tank empty |
@@ -75,7 +75,7 @@ pio run --target upload && pio device monitor
 ```
 src/main.c          — watering loop (app_main, ADC averaging, pump control)
 src/config.h/.c     — NVS-backed config (g_config struct, load/save/print)
-src/zigbee.h/.c     — Zigbee task (Phase 2 — not yet implemented)
+src/water_level.h/.c — reed switch sensor (GPIO3, pull-up)
 include/            — shared headers (currently unused)
 lib/                — local libraries (currently unused)
 platformio.ini      — board, framework, dependencies
@@ -106,9 +106,8 @@ CLAUDE.md           — this file
 - [x] Milestone 4 — Combine: automatic watering loop with threshold
 - [x] Milestone 5 — NVS config storage + ADC averaging
 - [x] Milestone 5b — Water level sensor (reed switch on GPIO3, blink LED + skip pump when empty)
-- [ ] Milestone 6 — Zigbee end device: moisture sensor + pump switch in ZHA
-- [ ] Milestone 7 — Zigbee writable config attributes (sliders in HA)
-- [ ] Milestone 8 — Deep sleep / sleepy end device
+- [ ] Milestone 6 — Deep sleep / sleepy end device
+- [ ] Milestone 7 — Bluetooth + Android app
 
 ## Key concepts (for learning)
 
