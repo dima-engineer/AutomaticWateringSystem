@@ -12,9 +12,10 @@ static const watering_config_t DEFAULTS = {
     .threshold_pct    = 40,
     .raw_dry          = 2000,
     .raw_wet          = 870,
-    .pump_duration_ms = 15000,
-    .pump_cooldown_ms = 10000,
-    .check_interval_ms = 10000,
+    .pump_duration_ms = 120000,  /* 2 minutes */
+    .pump_cooldown_ms = 300000,  /* 5 minutes */
+    .check_interval_ms = 3600000,  /* 1 hour */
+    .tank_empty_recheck_ms = 60000, /* 1 minute */
 };
 
 watering_config_t g_config;
@@ -54,6 +55,7 @@ void config_init(void)
     load_i32(h, "pump_dur",   &g_config.pump_duration_ms,  DEFAULTS.pump_duration_ms);
     load_i32(h, "cooldown",   &g_config.pump_cooldown_ms,  DEFAULTS.pump_cooldown_ms);
     load_i32(h, "check_int",  &g_config.check_interval_ms, DEFAULTS.check_interval_ms);
+    load_i32(h, "tank_rchk",  &g_config.tank_empty_recheck_ms, DEFAULTS.tank_empty_recheck_ms);
 
     nvs_close(h);
     ESP_LOGI(TAG, "Config loaded from NVS");
@@ -70,6 +72,7 @@ void config_save(void)
     nvs_set_i32(h, "pump_dur",   g_config.pump_duration_ms);
     nvs_set_i32(h, "cooldown",   g_config.pump_cooldown_ms);
     nvs_set_i32(h, "check_int",  g_config.check_interval_ms);
+    nvs_set_i32(h, "tank_rchk",  g_config.tank_empty_recheck_ms);
 
     ESP_ERROR_CHECK(nvs_commit(h));   /* flush write buffer to flash */
     nvs_close(h);
@@ -78,11 +81,12 @@ void config_save(void)
 
 void config_print(void)
 {
-    ESP_LOGI(TAG, "threshold=%d%%  raw_dry=%d  raw_wet=%d  pump=%dms  cooldown=%dms  check=%dms",
+    ESP_LOGI(TAG, "threshold=%d%%  raw_dry=%d  raw_wet=%d  pump=%dms  cooldown=%dms  check=%dms  tank_recheck=%dms",
              g_config.threshold_pct,
              g_config.raw_dry,
              g_config.raw_wet,
              g_config.pump_duration_ms,
              g_config.pump_cooldown_ms,
-             g_config.check_interval_ms);
+             g_config.check_interval_ms,
+             g_config.tank_empty_recheck_ms);
 }

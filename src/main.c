@@ -47,7 +47,6 @@
 #define BATTERY_ADC_MV      3100           /* full-scale for ADC_ATTEN_DB_12 */
 #define BATTERY_LOW_MV      4400           /* warn below 1.1 V per NiMH cell */
 #define SENSOR_WARMUP_MS    10            /* time for sensor to stabilise after power-on */
-#define TANK_EMPTY_SLEEP_S  30            /* re-check interval while tank is empty */
 
 static const char *TAG = "watering";
 static adc_oneshot_unit_handle_t s_adc;
@@ -241,12 +240,12 @@ void app_main(void)
 
         /* Tank empty — keep LED on during sleep as a continuous warning */
         if (!water_level_ok()) {
-            ESP_LOGW(TAG, "Tank empty — rechecking in %d s", TANK_EMPTY_SLEEP_S);
+            ESP_LOGW(TAG, "Tank empty — rechecking in %d ms", g_config.tank_empty_recheck_ms);
             gpio_set_level(WARNING_LED_PIN, 1);
 #if USE_DEEP_SLEEP
             gpio_hold_en(WARNING_LED_PIN);
 #endif
-            go_to_sleep(TANK_EMPTY_SLEEP_S * 1000);
+            go_to_sleep(g_config.tank_empty_recheck_ms);
             gpio_set_level(WARNING_LED_PIN, 0);  /* only reached when USE_DEEP_SLEEP=0 */
             continue;
         }

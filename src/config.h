@@ -7,6 +7,7 @@ typedef struct {
     int pump_duration_ms;   /* how long to run the pump each cycle     */
     int pump_cooldown_ms;   /* wait after watering before next check   */
     int check_interval_ms;  /* how often to read sensor when soil OK   */
+    int tank_empty_recheck_ms; /* how often to recheck when tank is empty */
 } watering_config_t;
 
 /* Single global config instance — read/write directly, then call config_save() */
