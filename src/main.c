@@ -19,6 +19,7 @@
  */
 
 #include "config.h"
+#include "ha_mqtt.h"
 #include "water_level.h"
 #include "driver/gpio.h"
 #include "esp_adc/adc_oneshot.h"
@@ -27,7 +28,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#define USE_DEEP_SLEEP      0              /* 1 = deep sleep (production), 0 = vTaskDelay (debug) */
+#define USE_DEEP_SLEEP      1              /* 1 = deep sleep (production), 0 = vTaskDelay (debug) */
 
 #define MOISTURE_CHANNEL    ADC_CHANNEL_1  /* GPIO1 */
 #define BATTERY_CHANNEL     ADC_CHANNEL_0  /* GPIO0 — battery voltage divider */
@@ -220,6 +221,8 @@ void app_main(void)
         config_print();
     }
 
+    ha_mqtt_init();
+
     warning_led_init();
     battery_led_init();
 
@@ -238,10 +241,18 @@ void app_main(void)
             ESP_LOGW(TAG, "Battery low: %d mV", vbat_mv);
         }
 
-        /* Tank empty — keep LED on during sleep as a continuous warning */
-        if (!water_level_ok()) {
-            ESP_LOGW(TAG, "Tank empty — rechecking in %d ms", g_config.tank_empty_recheck_ms);
+        /* Read moisture regardless of water level — useful data in both cases */
+        int pct = read_moisture_pct();
+        ESP_LOGI(TAG, "moisture: %d%%", pct);
+
+        bool water_ok = water_level_ok();
+        bool pump_activated = false;
+
+        if (!water_ok) {
+            ESP_LOGW(TAG, "Tank empty — moisture=%d%%  rechecking in %d ms",
+                     pct, g_config.tank_empty_recheck_ms);
             gpio_set_level(WARNING_LED_PIN, 1);
+            ha_mqtt_publish(pct, false, vbat_mv, false);
 #if USE_DEEP_SLEEP
             gpio_hold_en(WARNING_LED_PIN);
 #endif
@@ -250,14 +261,19 @@ void app_main(void)
             continue;
         }
 
-        int pct = read_moisture_pct();
-        ESP_LOGI(TAG, "moisture: %d%%", pct);
+        gpio_set_level(WARNING_LED_PIN, 0);
 
         if (pct < g_config.threshold_pct) {
             ESP_LOGI(TAG, "Dry — watering for %d ms", g_config.pump_duration_ms);
             pump_set(1);
             vTaskDelay(pdMS_TO_TICKS(g_config.pump_duration_ms));
             pump_set(0);
+            pump_activated = true;
+        }
+
+        ha_mqtt_publish(pct, true, vbat_mv, pump_activated);
+
+        if (pump_activated) {
             go_to_sleep(g_config.pump_cooldown_ms);
         } else {
             go_to_sleep(g_config.check_interval_ms);
